@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git 项目上传工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .form-section {
+            padding: 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .script-output {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .instructions {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .copy-btn {
+            background: #28a745;
+            font-size: 14px;
+            padding: 8px 16px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Git 项目上传工具</h1>
+            <p>生成一键上传脚本，小白也能轻松使用</p>
+        </div>
+        
+        <div class="form-section">
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label for="repoUrl">Git 仓库地址 *</label>
+                    <input type="url" id="repoUrl" placeholder="https://github.com/username/repository.git" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="projectPath">项目文件夹路径 *</label>
+                    <input type="text" id="projectPath" placeholder="C:\Users\用户名\Desktop\my-project" required>
+                    <small style="color: #666;">请输入项目文件夹的完整路径</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="commitMessage">提交信息</label>
+                    <input type="text" id="commitMessage" placeholder="Initial commit" value="Initial commit">
+                </div>
+                
+                <div class="form-group">
+                    <label for="branch">分支名称</label>
+                    <input type="text" id="branch" placeholder="main" value="main">
+                </div>
+                
+                <button type="submit" class="btn">
+                    📝 生成上传脚本
+                </button>
+                
+                <div class="script-output" id="scriptOutput">
+                    <h3>Windows 批处理脚本 (.bat)：</h3>
+                    <pre id="batScript"></pre>
+                    <button class="btn copy-btn" onclick="copyScript('bat')">复制 .bat 脚本</button>
+                    
+                    <h3 style="margin-top: 20px;">Mac/Linux 脚本 (.sh)：</h3>
+                    <pre id="shScript"></pre>
+                    <button class="btn copy-btn" onclick="copyScript('sh')">复制 .sh 脚本</button>
+                </div>
+                
+                <div class="instructions" id="instructions">
+                    <h3>� 使用说明：</h3>
+                    <ol>
+                        <li><strong>Windows 用户：</strong>
+                            <ul>
+                                <li>复制上面的 .bat 脚本内容</li>
+                                <li>在项目文件夹中新建文件 <code>upload.bat</code></li>
+                                <li>粘贴脚本内容并保存</li>
+                                <li>双击 <code>upload.bat</code> 运行</li>
+                            </ul>
+                        </li>
+                        <li><strong>Mac/Linux 用户：</strong>
+                            <ul>
+                                <li>复制上面的 .sh 脚本内容</li>
+                                <li>在项目文件夹中新建文件 <code>upload.sh</code></li>
+                                <li>粘贴脚本内容并保存</li>
+                                <li>打开终端，运行 <code>chmod +x upload.sh && ./upload.sh</code></li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <p><strong>⚠️ 注意：</strong>确保已安装 Git 并配置好用户名和邮箱</p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const uploadForm = document.getElementById('uploadForm');
+        const scriptOutput = document.getElementById('scriptOutput');
+        const instructions = document.getElementById('instructions');
+        const batScript = document.getElementById('batScript');
+        const shScript = document.getElementById('shScript');
+        
+        uploadForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            generateScripts();
+        });
+        
+        function generateScripts() {
+            const repoUrl = document.getElementById('repoUrl').value;
+            const projectPath = document.getElementById('projectPath').value;
+            const commitMessage = document.getElementById('commitMessage').value;
+            const branch = document.getElementById('branch').value;
+            
+            // 生成 Windows 批处理脚本
+            const batContent = `@echo off
+chcp 65001 >nul
+echo 🚀 开始上传项目到 Git 仓库...
+echo.
+
+cd /d "${projectPath}"
+if %errorlevel% neq 0 (
+    echo ❌ 错误：无法找到项目文件夹 "${projectPath}"
+    pause
+    exit /b 1
+)
+
+echo 📁 当前目录：%cd%
+echo.
+
+echo 🔧 初始化 Git 仓库...
+git init
+if %errorlevel% neq 0 (
+    echo ❌ Git 初始化失败，请检查是否已安装 Git
+    pause
+    exit /b 1
+)
+
+echo "git tag"
+echo 📦 添加所有文件...
+git add .
+
+echo 💾 提交文件...
+git commit -m "${commitMessage}"
+if %errorlevel% neq 0 (
+    echo ❌ 提交失败，请检查 Git 配置
+    pause
+    exit /b 1
+)
+
+echo 🌿 设置分支名称...
+git branch -M ${branch}
+
+echo 🔗 添加远程仓库...
+git remote add origin ${repoUrl}
+
+echo 🚀 推送到远程仓库...
+git push -u origin ${branch}
+if %errorlevel% neq 0 (
+    echo ❌ 推送失败，请检查仓库地址和网络连接
+    pause
+    exit /b 1
+)
+
+echo.
+echo ✅ 上传成功！项目已推送到：${repoUrl}
+echo 🌐 可以在浏览器中查看您的仓库
+pause`;
+
+            // 生成 Mac/Linux Shell 脚本
+            const shContent = `#!/bin/bash
+
+echo "🚀 开始上传项目到 Git 仓库..."
+echo
+
+cd "${projectPath}"
+if [ $? -ne 0 ]; then
+    echo "❌ 错误：无法找到项目文件夹 '${projectPath}'"
+    read -p "按回车键退出..."
+    exit 1
+fi
+
+echo "📁 当前目录：$(pwd)"
+echo
+
+echo "🔧 初始化 Git 仓库..."
+git init
+if [ $? -ne 0 ]; then
+    echo "❌ Git 初始化失败，请检查是否已安装 Git"
+    read -p "按回车键退出..."
+    exit 1
+fi
+
+echo "git tag"
+echo "📦 添加所有文件..."
+git add .
+
+echo "💾 提交文件..."
+git commit -m "${commitMessage}"
+if [ $? -ne 0 ]; then
+    echo "❌ 提交失败，请检查 Git 配置"
+    read -p "按回车键退出..."
+    exit 1
+fi
+
+echo "🌿 设置分支名称..."
+git branch -M ${branch}
+
+echo "🔗 添加远程仓库..."
+git remote add origin ${repoUrl}
+
+echo "🚀 推送到远程仓库..."
+git push -u origin ${branch}
+if [ $? -ne 0 ]; then
+    echo "❌ 推送失败，请检查仓库地址和网络连接"
+    read -p "按回车键退出..."
+    exit 1
+fi
+
+echo
+echo "✅ 上传成功！项目已推送到：${repoUrl}"
+echo "🌐 可以在浏览器中查看您的仓库"
+read -p "按回车键退出..."`;
+
+            batScript.textContent = batContent;
+            shScript.textContent = shContent;
+            
+            scriptOutput.style.display = 'block';
+            instructions.style.display = 'block';
+        }
+        
+        function copyScript(type) {
+            const script = type === 'bat' ? batScript.textContent : shScript.textContent;
+            navigator.clipboard.writeText(script).then(() => {
+                alert(`${type.toUpperCase()} 脚本已复制到剪贴板！`);
+            });
+        }
+    </script>
+</body>
+</html>
+
